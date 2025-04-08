@@ -1,0 +1,206 @@
+<style>
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  label {
+    font-weight: bold;
+    color: #495057;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  input[type="text"],
+  input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 16px;
+  }
+
+  .error-messages {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #f5c6cb;
+  }
+
+  .btn-submit {
+    background: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    font-weight: bold;
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+
+  .btn-submit:hover {
+    background: #218838;
+    transform: scale(1.05);
+  }
+</style>
+
+<%= form_with(model: mood_detection, class: "mood-form", html: { multipart: true }) do |form| %>
+  <% if mood_detection.errors.any? %>
+    <div class="error-messages">
+      <h2><%= pluralize(mood_detection.errors.count, "error") %> prevented saving:</h2>
+      <ul>
+        <% mood_detection.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if mood_detection.image.attached? %>
+  <div style="text-align: center; margin-bottom: 15px;">
+    <%= image_tag mood_detection.image.variant(resize_to_limit: [150, 150]), alt: "Current image", style: "border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" %>
+    <p style="font-size: 13px; color: #6c757d;">Current Image</p>
+  </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= form.label :user_name %>
+    <%= form.text_field :user_name, required: true %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :mood %>
+    <%= form.text_field :mood %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :confidence %>
+    <%= form.text_field :confidence %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :image %>
+    <%= form.file_field :image %>
+  </div>
+
+  <div id="cameraWrapper" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1);">
+  <label style="font-weight: bold;">Or capture using camera:</label>
+  
+  <button type="button" id="openCamera" style="margin-top: 10px; background: #007bff; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;">📷 Open Camera</button>
+
+  <div id="cameraSection" style="display: none; margin-top: 15px;">
+    <video id="camera" width="100%" height="auto" autoplay playsinline style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></video>
+
+    <div style="margin-top: 10px;">
+      <button type="button" id="capture" style="background: #28a745; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;">📸 Capture</button>
+      <button type="button" id="cancelCamera" style="background: #dc3545; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; margin-left: 10px;">❌ Cancel</button>
+    </div>
+  </div>
+
+  <div id="preview" style="display: none; margin-top: 15px; text-align: center;">
+    <img id="capturedImagePreview" src="" alt="Captured Image" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+  </div>
+
+  <input type="hidden" name="captured_image" id="captured_image">
+</div>
+  
+  <div>
+    <%= form.submit "Save Mood Detection", class: "btn-submit" %>
+  </div>
+<% end %>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const openCamera = document.getElementById('openCamera');
+    const cameraSection = document.getElementById('cameraSection');
+    const fileInput = document.querySelector('input[type="file"]');
+    const captureButton = document.getElementById('capture');
+    const cancelCamera = document.getElementById('cancelCamera');
+    const video = document.getElementById('camera');
+    const canvas = document.createElement('canvas');
+    const preview = document.getElementById('preview');
+    const previewImg = document.getElementById('capturedImagePreview');
+    const hiddenInput = document.getElementById('captured_image');
+
+    let stream;
+
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+      } catch (err) {
+        alert('Could not access camera.');
+      }
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+        stream = null;
+      }
+    }
+
+    openCamera.addEventListener('click', () => {
+      cameraSection.style.display = 'block';
+      fileInput.closest('.form-group').style.display = 'none';
+      preview.style.display = 'none';
+      startCamera();
+    });
+
+    cancelCamera.addEventListener('click', () => {
+      cameraSection.style.display = 'none';
+      fileInput.closest('.form-group').style.display = 'block';
+      preview.style.display = 'none';
+      stopCamera();
+    });
+
+    captureButton.addEventListener('click', () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/png');
+
+      previewImg.src = dataUrl;
+      hiddenInput.value = dataUrl;
+      preview.style.display = 'block';
+
+      // Stop the camera and hide the video
+      stopCamera();
+      cameraSection.style.display = 'none';
+    });
+  });
+
+  const form = document.querySelector('.mood-form');
+  form.addEventListener('submit', (e) => {
+    const base64Data = hiddenInput.value;
+
+    if (base64Data) {
+      // Convert base64 to blob
+      const byteString = atob(base64Data.split(',')[1]);
+      const mimeString = base64Data.split(',')[0].split(':')[1].split(';')[0];
+
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+
+      const blob = new Blob([ab], { type: mimeString });
+      const file = new File([blob], 'captured_image.png', { type: mimeString });
+
+      // Create a new DataTransfer and assign to file input
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      fileInput.files = dataTransfer.files;
+    }
+  });
+</script>

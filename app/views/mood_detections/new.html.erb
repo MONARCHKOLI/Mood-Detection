@@ -1,0 +1,44 @@
+<style>
+  .mood-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .mood-title {
+    text-align: center;
+    font-size: 24px;
+    color: #343a40;
+    margin-bottom: 20px;
+  }
+
+  .btn-back {
+    display: inline-block;
+    margin-top: 20px;
+    background: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s ease;
+  }
+
+  .btn-back:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+  }
+</style>
+
+<div class="mood-container">
+  <h1 class="mood-title">New Mood Detection</h1>
+
+  <%= render "form", mood_detection: @mood_detection %>
+
+  <div style="text-align: center;">
+    <%= link_to "← Back to mood detections", mood_detections_path, class: "btn-back" %>
+  </div>
+</div>

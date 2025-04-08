@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>      
+  <head>
+    <title>Mood Detection App</title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+
+    <style>
+      body {
+        background: #f4f6f8;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      .app-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px 15px;
+      }
+
+      header {
+        background: #007bff;
+        color: white;
+        padding: 15px 30px;
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      }
+
+      footer {
+        text-align: center;
+        padding: 20px;
+        color: #888;
+        font-size: 14px;
+      }
+
+      a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      Mood Detection App 🎭
+    </header>
+
+    <div class="app-container">
+      <%= yield %>
+    </div>
+
+    <footer>
+      &copy; <%= Time.now.year %> Mood Detection App. All rights reserved.
+    </footer>
+  </body>
+</html>

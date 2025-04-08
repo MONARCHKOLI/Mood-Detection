@@ -1,0 +1,99 @@
+<style>
+  .mood-show-container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: #333;
+    font-family: 'Helvetica Neue', sans-serif;
+  }
+
+  .mood-header {
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #007bff;
+  }
+
+  .mood-detail {
+    font-size: 18px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+  }
+
+  .mood-image-preview {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .mood-image-preview img {
+    border-radius: 8px;
+    max-width: 100%;
+    max-height: 300px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  }
+
+  .btn-group {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .btn-link {
+    display: inline-block;
+    margin: 8px;
+    padding: 10px 15px;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: 0.3s ease;
+  }
+
+  .btn-edit {
+    background: #ffc107;
+    color: black;
+  }
+
+  .btn-back {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-delete {
+    background: #dc3545;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-link:hover {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+</style>
+
+<div class="mood-show-container">
+  <p style="color: green"><%= notice %></p>
+
+  <h1 class="mood-header">Mood Detection Details</h1>
+
+  <div class="mood-image-preview">
+    <% if @mood_detection.image.attached? %>
+      <%= image_tag @mood_detection.image.variant(resize_to_limit: [300, 300]), alt: "Captured image" %>
+    <% else %>
+      <em>No image uploaded</em>
+    <% end %>
+  </div>
+
+  <div class="mood-detail"><strong>👤 User:</strong> <%= @mood_detection.user_name %></div>
+  <div class="mood-detail"><strong>😊 Mood:</strong> <%= @mood_detection&.mood %></div>
+  <div class="mood-detail"><strong>📊 Confidence:</strong> <%= @mood_detection&.confidence&.round(2) %>%</div>
+
+  <div class="btn-group">
+    <%= link_to "✏️ Edit", edit_mood_detection_path(@mood_detection), class: "btn-link btn-edit" %>
+    <%= link_to "← Back", mood_detections_path, class: "btn-link btn-back" %>
+    <%= button_to "🗑 Delete", @mood_detection, method: :delete, data: { confirm: "Are you sure?" }, class: "btn-link btn-delete" %>
+  </div>
+</div>

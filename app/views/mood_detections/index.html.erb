@@ -1,0 +1,136 @@
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background: #f8f9fa;
+    padding: 20px;
+  }
+
+  .mood-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .mood-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #343a40;
+  }
+
+  .btn-new-mood {
+    background: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  .btn-new-mood:hover {
+    background: #218838;
+    transform: scale(1.05);
+  }
+
+  .mood-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .mood-card:hover {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    transform: scale(1.02);
+  }
+
+  .mood-info {
+    flex-grow: 1;
+    font-size: 16px;
+    color: #495057;
+  }
+
+  .mood-info strong {
+    color: #212529;
+  }
+
+  .mood-image {
+    border-radius: 10%;
+    margin-right: 15px;
+    object-fit: cover;
+  }
+
+  .mood-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-show {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-edit {
+    background: #ffc107;
+    color: black;
+  }
+
+  .btn-delete {
+    background: #dc3545;
+    color: white;
+  }
+
+  .btn:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+</style>
+
+<div class="mood-container">
+  <h1 class="mood-title">Mood Detections</h1>
+  <%= link_to new_mood_detection_path, class: "btn btn-new-mood" do %>
+    ➕ New Mood Detection
+  <% end %>
+</div>
+
+<div id="mood_detections">
+  <% @mood_detections.each do |mood_detection| %>
+    <div class="mood-card">
+      <% if mood_detection.image.attached? %>
+        <%= image_tag mood_detection.image.variant(resize_to_limit: [80, 80]),
+                      alt: "Captured image", class: "mood-image" %>
+      <% end %>
+      <div class="mood-info">
+        <strong>User:</strong> <%= mood_detection.user_name %><br>
+        <strong>Mood:</strong> <%= mood_detection.mood.capitalize %><br>
+        <strong>Confidence:</strong> <%= mood_detection&.confidence&.round(2) %>%
+      </div>
+      <div class="mood-actions">
+        <%= link_to "🔍 Show", mood_detection, class: "btn btn-show" %>
+        <%= link_to "✏️ Edit", edit_mood_detection_path(mood_detection), class: "btn btn-edit" %>
+        <%= button_to "🗑 Delete", mood_detection, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-delete" %>
+      </div>
+    </div>
+  <% end %>
+</div>
