@@ -24,6 +24,7 @@ class MoodDetectionsController < ApplicationController
   # POST /mood_detections or /mood_detections.json
   def create
     @mood_detection = MoodDetection.new(mood_detection_params)
+
     if params[:captured_image].present?
       decoded_image = decode_base64_image(params[:captured_image])
       @mood_detection.image.attach(decoded_image)
@@ -32,7 +33,8 @@ class MoodDetectionsController < ApplicationController
     respond_to do |format|
       if @mood_detection.save
         ProcessMoodDetectionJob.perform_later(@mood_detection.id)
-        format.html { redirect_to @mood_detection, notice: "Mood detection was successfully created." }
+
+        format.html { redirect_to @mood_detection, notice: "Mood detection was successfully created. Processing face match..." }
         format.json { render :show, status: :created, location: @mood_detection }
       else
         format.html { render :new, status: :unprocessable_entity }

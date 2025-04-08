@@ -76,6 +76,18 @@
 
 <div class="mood-show-container">
   <p style="color: green"><%= notice %></p>
+  <p><strong>Face Match:</strong>
+  <% if @mood_detection.face_match.nil? %>
+    Processing...
+  <% elsif @mood_detection.face_match %>
+    ✅ Yes
+  <% else %>
+    ❌ No
+    <% if @mood_detection.face_match_error.present? %>
+      <br><small class="text-danger">Error: <%= @mood_detection.face_match_error %></small>
+    <% end %>
+  <% end %>
+</p>
 
   <h1 class="mood-header">Mood Detection Details</h1>
 

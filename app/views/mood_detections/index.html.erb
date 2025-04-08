@@ -124,7 +124,15 @@
       <div class="mood-info">
         <strong>User:</strong> <%= mood_detection.user_name %><br>
         <strong>Mood:</strong> <%= mood_detection.mood.capitalize %><br>
-        <strong>Confidence:</strong> <%= mood_detection&.confidence&.round(2) %>%
+        <strong>Confidence:</strong> <%= mood_detection&.confidence&.round(2) %>%<br>
+        <strong>Face Match:</strong><% if mood_detection.face_match %>
+    ✅ Yes
+  <% else %>
+    ❌ No
+    <% if mood_detection.face_match_error.present? %>
+      <br><small class="text-danger">Error: <%= mood_detection.face_match_error %></small>
+    <% end %>
+  <% end %>
       </div>
       <div class="mood-actions">
         <%= link_to "🔍 Show", mood_detection, class: "btn btn-show" %>
