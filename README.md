@@ -1,90 +1,185 @@
-# Mood Detection App
+# 😊 Mood & Face Detection App
 
-This is a Ruby on Rails 7 application (Ruby 3.2) that detects the user's mood from an uploaded or camera-captured image using the [DeepFace](https://github.com/serengil/deepface) Python library.
+This Ruby on Rails application detects **facial expressions (moods)** and optionally performs **face recognition** from uploaded or captured images using integrated Python scripts powered by [DeepFace](https://github.com/serengil/deepface) and [face_recognition](https://github.com/ageitgey/face_recognition).
 
-## ✨ Features
-
-- Upload or capture an image using your device's webcam.
-- Detect facial expressions/mood from the image using DeepFace.
-- Store detected mood and image in the database.
-- Auto-create company records based on OCR (optional extension).
-- Docker support (optional).
-
-## 🛠️ Stack
-
-- **Backend:** Ruby on Rails 7, Ruby 3.2
-- **Database:** PostgreSQL
-- **Frontend:** Turbo, Stimulus, HTML/CSS
-- **Python:** DeepFace (via virtual environment)
-- **Image Uploads:** Active Storage
+Users can upload or capture a photo, and the system identifies the user's **mood (e.g., happy, sad, neutral)** and whether the face matches a known individual.
 
 ---
 
-## ⚙️ Setup Instructions
+## 🔍 Features
 
-### 1. Clone and Install Dependencies
+- 📸 Upload or capture a photo using webcam (HTML5-based)
+- 😄 Detect mood (happy, sad, angry, neutral, etc.)
+- 🧠 Face recognition from stored faces (`face_recognition_data/`)
+- 📊 Displays confidence score
+- 💾 Stores all results in a database
+- 🪄 Background processing with `ActiveJob`
+- 🧪 Optional emotion and face match testing via logs
+
+---
+
+## 🖼️ Demo
+
+| Upload Page                | Result Page                |
+| -------------------------- | -------------------------- |
+| ![Upload](docs/upload.png) | ![Result](docs/result.png) |
+
+---
+
+## ⚙️ Tech Stack
+
+- **Ruby on Rails 7**
+- **Python 3.10 (DeepFace + face_recognition)**
+- **PostgreSQL** (or compatible DB)
+- **ActiveStorage** (for image upload)
+- **Stimulus / JS** (for camera interaction)
+- **RVM / Virtualenv** (for separate Ruby and Python envs)
+
+---
+
+## 🚀 Setup Instructions
+
+### 1. Clone & Install Dependencies
 
 ```bash
-git clone https://github.com/your-username/mood_detection_app.git
-cd mood_detection_app
+git clone https://github.com/your-username/mood-detector.git
+cd mood-detector
+
 bundle install
-yarn install # if using webpack
+yarn install # if you're using Webpacker or jsbundling
+rails db:setup
 ```
 
-### 2. Setup Database
+### 2. Setup Python (Face & Mood Detection)
 
-```
-rails db:create db:migrate
-```
+Create a Python virtual environment inside the Rails project:
 
-### 3. Set Up Python Environment
+```bash
+cd python
+python3.10 -m venv venv310
+source venv310/bin/activate
 
-Install Python dependencies in a virtual environment (recommended):
-
-```
-python3 -m venv venv
-source venv/bin/activate
-pip install deepface opencv-python pillow numpy
+pip install -r requirements.txt
 ```
 
-- Ensure Python dependencies are installed within your project to avoid global system conflicts.
+`requirements.txt` content:
 
-### 4. Run Rails Server
+```txt
+deepface
+face_recognition
+cmake
+dlib
 
 ```
+
+### 3. Prepare Known Faces
+
+Place labeled images in `python/face_recognition_data/` directory:
+
+```markdown
+python/
+└── face_recognition_data/
+├── Alice.jpg
+└── Bob.jpg
+```
+
+File name is treated as the person's name.
+
+### 4. Run the App
+
+```bash
 rails server
 ```
 
-### 📸 Image Upload & Detection
+Visit http://localhost:3000
 
-You can upload an image or capture one via your webcam. On form submission:
+### 🧪 Testing
 
-- The image is stored via ActiveStorage.
+Basic Rails tests can be run with:
 
-- A background job or direct call sends the image to the Python backend.
+```bash
+rails test
+```
 
-- The DeepFace library processes the image and returns a predicted mood.
+You can also manually test Python scripts:
 
-#### Example Flow
+```bash
+# Detect mood
+python python/emotion_detector.py path/to/image.jpg
 
-# User opens the mood detection form.
+# Check face match
+python python/face_recognizer.py path/to/image.jpg
 
-# Chooses to Upload or Capture an image.
+```
 
-# The app displays the predicted mood after analysis.
+### 📡 API Endpoints
 
-#### 🧠 To-Do
+If using JSON API:
 
-- Upload image via form
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
 
-- Preview captured image
+| POST | `/mood_detections` | Upload & analyze image |
+| ---- | ------------------ | ---------------------- |
 
-- Send image to Python backend for mood analysis
+| GET | `/mood_detections/:id` | View mood & match results |
+| --- | ---------------------- | ------------------------- |
 
-- Auto-link OCR company name (optional)
+---
 
-- Add Docker support for deployment
+### 🎯 How It Works
 
-### 👨‍💻 Author
+1. User uploads or captures a photo.
 
-Developed by https://github.com/MONARCHKOLI
+2. Image is stored via ActiveStorage.
+
+3. ProcessMoodDetectionJob runs:
+
+   - Calls Python script emotion_detector.py to detect mood.
+
+   - Calls face_recognizer.py to check if face matches stored known faces.
+
+4. Results (mood, confidence, face match, error) are saved to the database.
+
+### 🔐 Environment Variables
+
+Not required at this time — everything runs locally with proper file paths. But you can configure:
+
+- `PYTHON_PATH` if you want to externalize the Python executable location.
+- `KNOWN_FACES_DIR` if you relocate the directory.
+
+---
+
+### 🧩 Known Issues
+
+- Webcam capture may not work on all mobile browsers.
+
+- Face recognition requires clear face visibility.
+
+- Lighting & angles can affect mood detection accuracy.
+
+### 🚧 Future Improvements
+
+- Live face detection preview
+
+- Support multiple faces in one image
+
+- Turbo Stream for live updates
+
+- Add emotion history charts per user
+
+- Dockerize for easier deployment
+
+### 📦 Deployment
+
+To deploy:
+
+1.  Make sure Python dependencies are installed in production
+2.  Add `python/venv310` to your Docker build or use system Python
+3.  Precompile assets and migrate DB
+
+### 🙌 Credits
+
+- [DeepFace](https://github.com/serengil/deepface)
+- [face_recognition](https://github.com/ageitgey/face_recognition)
+- Ruby on Rails community ❤️
